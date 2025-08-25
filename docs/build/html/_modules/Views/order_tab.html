@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+
+<html lang="ru" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Views.order_tab &#8212; документация Приложение магазина 1.0</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=9ca2116e"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/translations.js?v=cd1d70c9"></script>
+    <link rel="index" title="Алфавитный указатель" href="../../genindex.html" />
+    <link rel="search" title="Поиск" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Исходный код Views.order_tab</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tk</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">ttk</span><span class="p">,</span> <span class="n">messagebox</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">BD.db</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">Models.orders</span><span class="w"> </span><span class="kn">import</span> <span class="n">Orders</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
+
+<div class="viewcode-block" id="OrderTab">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab">[документация]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">OrderTab</span><span class="p">:</span>
+<div class="viewcode-block" id="OrderTab.__init__">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab.__init__">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_frame</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent_frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_order_items</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Текущие позиции заказа</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_order_tab</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="OrderTab.load_customers">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab.load_customers">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_customers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Загрузка клиентов из БД&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;BD/my_app.db&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+                <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+                <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT id, name FROM customers ORDER BY name&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Ошибка БД&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Ошибка при загрузке клиентов:</span><span class="se">\n</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span></div>
+
+    
+<div class="viewcode-block" id="OrderTab.load_goods">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab.load_goods">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_goods</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Загрузка товаров из БД&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;BD/my_app.db&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+                <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+                <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT id, naim, price FROM goods ORDER BY naim&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Ошибка БД&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Ошибка при загрузке товаров:</span><span class="se">\n</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span></div>
+
+    
+<div class="viewcode-block" id="OrderTab.on_customer_select">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab.on_customer_select">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_customer_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Обработчик выбора клиента&quot;&quot;&quot;</span>
+        <span class="n">selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer_combobox</span><span class="o">.</span><span class="n">current</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">selection</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_customer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customers</span><span class="p">[</span><span class="n">selection</span><span class="p">]</span></div>
+
+    
+<div class="viewcode-block" id="OrderTab.on_good_select">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab.on_good_select">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_good_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Обработчик выбора товара&quot;&quot;&quot;</span>
+        <span class="n">selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">goods_combobox</span><span class="o">.</span><span class="n">current</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">selection</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_good</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">goods</span><span class="p">[</span><span class="n">selection</span><span class="p">]</span>
+            <span class="n">good_id</span><span class="p">,</span> <span class="n">good_name</span><span class="p">,</span> <span class="n">price</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_good</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">price_var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Цена: </span><span class="si">{</span><span class="n">price</span><span class="si">}</span><span class="s2"> руб.&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="OrderTab.add_item_to_order">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab.add_item_to_order">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_item_to_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Добавление позиции к текущему заказу&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;selected_customer&#39;</span><span class="p">):</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Ошибка&quot;</span><span class="p">,</span> <span class="s2">&quot;Сначала выберите клиента&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;selected_good&#39;</span><span class="p">):</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Ошибка&quot;</span><span class="p">,</span> <span class="s2">&quot;Выберите товар&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+            
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count_entry</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Ошибка&quot;</span><span class="p">,</span> <span class="s2">&quot;Количество должно быть положительным числом&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+                
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Ошибка&quot;</span><span class="p">,</span> <span class="s2">&quot;Введите корректное количество&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="n">good_id</span><span class="p">,</span> <span class="n">good_name</span><span class="p">,</span> <span class="n">price</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_good</span>
+        <span class="n">item_total</span> <span class="o">=</span> <span class="n">price</span> <span class="o">*</span> <span class="n">count</span>
+        
+        <span class="c1"># Добавляем позицию в текущий заказ</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_order_items</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">good_id</span><span class="p">,</span> <span class="n">good_name</span><span class="p">,</span> <span class="n">price</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">item_total</span><span class="p">))</span>
+        
+        <span class="c1"># Обновляем список позиций</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_order_items_list</span><span class="p">()</span>
+        
+        <span class="c1"># Очищаем поля для следующей позиции</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goods_combobox</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_entry</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tk</span><span class="o">.</span><span class="n">END</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">price_var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;Цена: выберите товар&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;selected_good&#39;</span><span class="p">):</span>
+            <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;selected_good&#39;</span><span class="p">)</span>
+        
+        <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;Успех&quot;</span><span class="p">,</span> <span class="s2">&quot;Позиция добавлена к заказу&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="OrderTab.update_order_items_list">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab.update_order_items_list">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_order_items_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Обновление списка позиций заказа&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items_listbox</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tk</span><span class="o">.</span><span class="n">END</span><span class="p">)</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">good_id</span><span class="p">,</span> <span class="n">good_name</span><span class="p">,</span> <span class="n">price</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">item_total</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_order_items</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">items_listbox</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">tk</span><span class="o">.</span><span class="n">END</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">good_name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">price</span><span class="si">}</span><span class="s2"> руб. x </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">item_total</span><span class="si">}</span><span class="s2"> руб.&quot;</span><span class="p">)</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="n">item_total</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Общая сумма: </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2"> руб.&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="OrderTab.create_order">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab.create_order">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Создание окончательного заказа&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;selected_customer&#39;</span><span class="p">):</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Ошибка&quot;</span><span class="p">,</span> <span class="s2">&quot;Выберите клиента&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_order_items</span><span class="p">:</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Ошибка&quot;</span><span class="p">,</span> <span class="s2">&quot;Добавьте хотя бы одну позицию в заказ&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="n">customer_id</span><span class="p">,</span> <span class="n">customer_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_customer</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">item_total</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">item_total</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_order_items</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;BD/my_app.db&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+                <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+                
+                <span class="c1"># Создаем заказ</span>
+                <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="s2">&quot;INSERT INTO orders (customer_id, total_price) VALUES (?,?)&quot;</span><span class="p">,</span> 
+                    <span class="p">(</span><span class="n">customer_id</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">order_id</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">lastrowid</span>
+                
+                <span class="c1"># Добавляем позиции заказа</span>
+                <span class="k">for</span> <span class="n">good_id</span><span class="p">,</span> <span class="n">good_name</span><span class="p">,</span> <span class="n">price</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">item_total</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_order_items</span><span class="p">:</span>
+                    <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                        <span class="s2">&quot;INSERT INTO order_items (order_id, good_id, quantity, price, item_total) VALUES (?,?,?,?,?)&quot;</span><span class="p">,</span> 
+                        <span class="p">(</span><span class="n">order_id</span><span class="p">,</span> <span class="n">good_id</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">price</span><span class="p">,</span> <span class="n">item_total</span><span class="p">)</span>
+                    <span class="p">)</span>
+                
+                <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            
+            <span class="c1"># Запись в CSV</span>
+            <span class="n">items_for_csv</span> <span class="o">=</span> <span class="p">[(</span><span class="n">good_name</span><span class="p">,</span> <span class="n">price</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">item_total</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">good_name</span><span class="p">,</span> <span class="n">price</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">item_total</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_order_items</span><span class="p">]</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="n">Orders</span><span class="p">(</span><span class="n">order_id</span><span class="p">,</span> <span class="n">customer_name</span><span class="p">,</span> <span class="n">items_for_csv</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+            <span class="n">order_db</span> <span class="o">=</span> <span class="n">OrdersData</span><span class="p">()</span>
+            <span class="n">order_db</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+            
+            <span class="c1"># Очистка формы</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clear_form</span><span class="p">()</span>
+            
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;Успех&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Заказ №</span><span class="si">{</span><span class="n">order_id</span><span class="si">}</span><span class="s2"> успешно создан!&quot;</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Ошибка БД&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Ошибка при создании заказа:</span><span class="se">\n</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="OrderTab.clear_form">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab.clear_form">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_form</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Очистка формы&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_order_items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">customer_combobox</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goods_combobox</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_entry</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tk</span><span class="o">.</span><span class="n">END</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items_listbox</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tk</span><span class="o">.</span><span class="n">END</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;Общая сумма: 0 руб.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">price_var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;Цена: выберите товар&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;selected_customer&#39;</span><span class="p">):</span>
+            <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;selected_customer&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;selected_good&#39;</span><span class="p">):</span>
+            <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;selected_good&#39;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="OrderTab.load_orders">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab.load_orders">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_orders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Загрузка заказов из БД в Listbox&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tk</span><span class="o">.</span><span class="n">END</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;BD/my_app.db&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+                <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+                <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">                    SELECT o.id, c.name, o.total_price, o.order_date, o.status,</span>
+<span class="s1">                           (SELECT COUNT(*) FROM order_items oi WHERE oi.order_id = o.id) as item_count</span>
+<span class="s1">                    FROM orders o</span>
+<span class="s1">                    JOIN customers c ON o.customer_id = c.id</span>
+<span class="s1">                    ORDER BY o.id DESC</span>
+<span class="s1">                &#39;&#39;&#39;</span><span class="p">)</span>
+                <span class="n">orders</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+                
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">orders</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">tk</span><span class="o">.</span><span class="n">END</span><span class="p">,</span> <span class="s2">&quot;Нет заказов в базе данных&quot;</span><span class="p">)</span>
+                    <span class="k">return</span>
+                
+                <span class="c1"># Добавляем заголовки столбцов</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">tk</span><span class="o">.</span><span class="n">END</span><span class="p">,</span> <span class="s2">&quot;ID&quot;</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; | &quot;</span> <span class="o">+</span> 
+                                          <span class="s2">&quot;Клиент&quot;</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; | &quot;</span> <span class="o">+</span> 
+                                          <span class="s2">&quot;Позиций&quot;</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; | &quot;</span> <span class="o">+</span> 
+                                          <span class="s2">&quot;Сумма&quot;</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; | &quot;</span> <span class="o">+</span> 
+                                          <span class="s2">&quot;Статус&quot;</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; | &quot;</span> <span class="o">+</span> 
+                                          <span class="s2">&quot;Дата&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">tk</span><span class="o">.</span><span class="n">END</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+                
+                <span class="k">for</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">orders</span><span class="p">:</span>
+                    <span class="n">order_id</span><span class="p">,</span> <span class="n">customer</span><span class="p">,</span> <span class="n">total_price</span><span class="p">,</span> <span class="n">order_date</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">item_count</span> <span class="o">=</span> <span class="n">order</span>
+                    <span class="n">date_str</span> <span class="o">=</span> <span class="n">order_date</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">order_date</span> <span class="k">else</span> <span class="s2">&quot;н/д&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">tk</span><span class="o">.</span><span class="n">END</span><span class="p">,</span> 
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">order_id</span><span class="p">)</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="si">}</span><span class="s2"> | &quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">customer</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="si">}</span><span class="s2"> | &quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">item_count</span><span class="p">)</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="si">}</span><span class="s2"> | &quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">total_price</span><span class="p">)</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="si">}</span><span class="s2"> | &quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">status</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="si">}</span><span class="s2"> | &quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    
+        <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Ошибка БД&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Ошибка при загрузке заказов:</span><span class="se">\n</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">tk</span><span class="o">.</span><span class="n">END</span><span class="p">,</span> <span class="s2">&quot;Ошибка загрузки данных&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="OrderTab.show_order_details">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab.show_order_details">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show_order_details</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Показать детали заказа&quot;&quot;&quot;</span>
+        <span class="n">selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span><span class="o">.</span><span class="n">curselection</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">selection</span><span class="p">:</span>
+            <span class="n">selected_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">selection</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">order_id</span> <span class="o">=</span> <span class="n">selected_text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;BD/my_app.db&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+                    <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+                    <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">                        SELECT g.naim, oi.price, oi.quantity, oi.item_total</span>
+<span class="s1">                        FROM order_items oi</span>
+<span class="s1">                        JOIN goods g ON oi.good_id = g.id</span>
+<span class="s1">                        WHERE oi.order_id = ?</span>
+<span class="s1">                    &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">order_id</span><span class="p">,))</span>
+                    <span class="n">items</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+                    
+                    <span class="n">details</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Детали заказа #</span><span class="si">{</span><span class="n">order_id</span><span class="si">}</span><span class="s2">:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+                    <span class="k">for</span> <span class="n">naim</span><span class="p">,</span> <span class="n">price</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">item_total</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+                        <span class="n">details</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">naim</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">price</span><span class="si">}</span><span class="s2"> руб. x </span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">item_total</span><span class="si">}</span><span class="s2"> руб.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    
+                    <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;Детали заказа&quot;</span><span class="p">,</span> <span class="n">details</span><span class="p">)</span>
+                    
+            <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Ошибка БД&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Ошибка при загрузке деталей заказа:</span><span class="se">\n</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OrderTab.create_order_tab">
+<a class="viewcode-back" href="../../Views.order_tab.html#Views.order_tab.OrderTab.create_order_tab">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_order_tab</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Загружаем данные</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">customers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_customers</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goods</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_goods</span><span class="p">()</span>
+        
+        <span class="c1"># Создаем фрейм для формы добавления</span>
+        <span class="n">form_frame</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">LabelFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Создание нового заказа&quot;</span><span class="p">)</span>
+        <span class="n">form_frame</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;ew&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Клиент</span>
+        <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">form_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Клиент:&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="n">customer_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">customer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">customer</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">customer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">customers</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">customer_combobox</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Combobox</span><span class="p">(</span><span class="n">form_frame</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">customer_names</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s2">&quot;readonly&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">customer_combobox</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;ew&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">customer_combobox</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s1">&#39;&lt;&lt;ComboboxSelected&gt;&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_customer_select</span><span class="p">)</span>
+        
+        <span class="c1"># Товар</span>
+        <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">form_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Товар:&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="n">goods_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">good</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">good</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">good</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> руб.)&quot;</span> <span class="k">for</span> <span class="n">good</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">goods</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goods_combobox</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Combobox</span><span class="p">(</span><span class="n">form_frame</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">goods_names</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s2">&quot;readonly&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goods_combobox</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;ew&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goods_combobox</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s1">&#39;&lt;&lt;ComboboxSelected&gt;&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_good_select</span><span class="p">)</span>
+        
+        <span class="c1"># Количество</span>
+        <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">form_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Количество:&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_entry</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Entry</span><span class="p">(</span><span class="n">form_frame</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_entry</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Цена</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">price_var</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">StringVar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">price_var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;Цена: выберите товар&quot;</span><span class="p">)</span>
+        <span class="n">price_label</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">form_frame</span><span class="p">,</span> <span class="n">textvariable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">price_var</span><span class="p">)</span>
+        <span class="n">price_label</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        
+        <span class="c1"># Кнопка добавления позиции</span>
+        <span class="n">add_item_btn</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">form_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Добавить позицию&#39;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">add_item_to_order</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s1">&#39;lightblue&#39;</span><span class="p">)</span>
+        <span class="n">add_item_btn</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="c1"># Список текущих позиций</span>
+        <span class="n">items_frame</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">LabelFrame</span><span class="p">(</span><span class="n">form_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Текущие позиции заказа&quot;</span><span class="p">)</span>
+        <span class="n">items_frame</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;ew&#39;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">items_listbox</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Listbox</span><span class="p">(</span><span class="n">items_frame</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">70</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items_listbox</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;ew&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Общая сумма</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_var</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">StringVar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;Общая сумма: 0 руб.&quot;</span><span class="p">)</span>
+        <span class="n">total_label</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">form_frame</span><span class="p">,</span> <span class="n">textvariable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">total_var</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Arial&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;bold&#39;</span><span class="p">))</span>
+        <span class="n">total_label</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="c1"># Кнопка создания заказа</span>
+        <span class="n">create_order_btn</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">form_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Создать заказ&#39;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">create_order</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s1">&#39;lightgreen&#39;</span><span class="p">)</span>
+        <span class="n">create_order_btn</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        
+        <span class="c1"># Кнопка очистки формы</span>
+        <span class="n">clear_btn</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">form_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Очистить форму&#39;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clear_form</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="s1">&#39;lightcoral&#39;</span><span class="p">)</span>
+        <span class="n">clear_btn</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+        <span class="c1"># Создаем фрейм для списка заказов</span>
+        <span class="n">list_frame</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">LabelFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Список заказов&quot;</span><span class="p">)</span>
+        <span class="n">list_frame</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Listbox для отображения заказов</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Listbox</span><span class="p">(</span><span class="n">list_frame</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Courier New&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s1">&#39;&lt;Double-Button-1&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_order_details</span><span class="p">)</span>
+        
+        <span class="c1"># Scrollbar для Listbox</span>
+        <span class="n">scrollbar</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Scrollbar</span><span class="p">(</span><span class="n">list_frame</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span><span class="o">.</span><span class="n">yview</span><span class="p">)</span>
+        <span class="n">scrollbar</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;ns&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orders_listbox</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">yscrollcommand</span><span class="o">=</span><span class="n">scrollbar</span><span class="o">.</span><span class="n">set</span><span class="p">)</span>
+        
+        <span class="c1"># Кнопка обновления списка</span>
+        <span class="n">refresh_btn</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">list_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Обновить список&quot;</span><span class="p">,</span> 
+                               <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">load_orders</span><span class="p">,</span>
+                               <span class="n">bg</span><span class="o">=</span><span class="s1">&#39;lightblue&#39;</span><span class="p">)</span>
+        <span class="n">refresh_btn</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="c1"># Загружаем заказы при запуске</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_orders</span><span class="p">()</span>
+
+        <span class="c1"># Настройка веса колонок для растягивания</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">grid_columnconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">grid_rowconfigure</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">form_frame</span><span class="o">.</span><span class="n">grid_columnconfigure</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">list_frame</span><span class="o">.</span><span class="n">grid_columnconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">list_frame</span><span class="o">.</span><span class="n">grid_rowconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Приложение магазина</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Навигация</h3>
+<p class="caption" role="heading"><span class="caption-text">Модули:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Модули приложения</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Код модуля</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Рогозин А.Д..
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

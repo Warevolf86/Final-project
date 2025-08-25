@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html lang="ru" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analisys.Graphs &#8212; документация Приложение магазина 1.0</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=9ca2116e"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/translations.js?v=cd1d70c9"></script>
+    <link rel="index" title="Алфавитный указатель" href="../../genindex.html" />
+    <link rel="search" title="Поиск" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Исходный код Analisys.Graphs</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<div class="viewcode-block" id="Graphs">
+<a class="viewcode-back" href="../../Analisys.Graphs.html#Analisys.Graphs.Graphs">[документация]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Graphs</span><span class="p">:</span>
+<div class="viewcode-block" id="Graphs.__init__">
+<a class="viewcode-back" href="../../Analisys.Graphs.html#Analisys.Graphs.Graphs.__init__">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Graphs.get_city_goods_data">
+<a class="viewcode-back" href="../../Analisys.Graphs.html#Analisys.Graphs.Graphs.get_city_goods_data">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_city_goods_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Возвращает данные о товарах по городам&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;BD/my_app.db&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span> 
+                <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">SELECT </span>
+<span class="s1">    c.address as city,</span>
+<span class="s1">    g.naim as product_name,</span>
+<span class="s1">    SUM(oi.quantity) as total_quantity,</span>
+<span class="s1">    SUM(oi.item_total) as total_revenue</span>
+<span class="s1">FROM </span>
+<span class="s1">    orders o</span>
+<span class="s1">INNER JOIN </span>
+<span class="s1">    customers c ON o.customer_id = c.id</span>
+<span class="s1">INNER JOIN </span>
+<span class="s1">    order_items oi ON o.id = oi.order_id</span>
+<span class="s1">INNER JOIN </span>
+<span class="s1">    goods g ON oi.good_id = g.id</span>
+<span class="s1">WHERE </span>
+<span class="s1">    c.address IS NOT NULL AND c.address != &#39;&#39;</span>
+<span class="s1">GROUP BY </span>
+<span class="s1">    c.address, g.naim</span>
+<span class="s1">HAVING </span>
+<span class="s1">    SUM(oi.quantity) &gt; 0</span>
+<span class="s1">ORDER BY </span>
+<span class="s1">    c.address, total_quantity DESC</span>
+<span class="s1">&#39;&#39;&#39;</span>
+                <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">data</span>
+        <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ошибка при выполнении запроса: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span></div>
+
+    
+<div class="viewcode-block" id="Graphs.create_city_goods_graph">
+<a class="viewcode-back" href="../../Analisys.Graphs.html#Analisys.Graphs.Graphs.create_city_goods_graph">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_city_goods_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Создает граф связей между городами и товарами&quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_city_goods_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Нет данных для построения графа&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        
+        <span class="c1"># Создаем граф</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+        
+        <span class="c1"># Добавляем узлы и ребра</span>
+        <span class="k">for</span> <span class="n">city</span><span class="p">,</span> <span class="n">product</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">revenue</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="c1"># Добавляем город как узел</span>
+            <span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">city</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;city&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">quantity</span><span class="o">/</span><span class="mi">10</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
+            
+            <span class="c1"># Добавляем товар как узел</span>
+            <span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;product&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">revenue</span><span class="o">/</span><span class="mi">100</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+            
+            <span class="c1"># Добавляем связь между городом и товаром</span>
+            <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">city</span><span class="p">,</span> <span class="n">product</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">quantity</span><span class="p">,</span> <span class="n">revenue</span><span class="o">=</span><span class="n">revenue</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">G</span></div>
+
+    
+<div class="viewcode-block" id="Graphs.plot_city_goods_graph">
+<a class="viewcode-back" href="../../Analisys.Graphs.html#Analisys.Graphs.Graphs.plot_city_goods_graph">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_city_goods_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Строит и отображает граф товаров по городам&quot;&quot;&quot;</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_city_goods_graph</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">G</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Создаем график</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+        
+        <span class="c1"># Разделяем узлы по типам</span>
+        <span class="n">city_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;city&#39;</span><span class="p">]</span>
+        <span class="n">product_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;product&#39;</span><span class="p">]</span>
+        
+        <span class="c1"># Позиционирование узлов</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">spring_layout</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+        
+        <span class="c1"># Рисуем узлы городов</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> 
+                              <span class="n">nodelist</span><span class="o">=</span><span class="n">city_nodes</span><span class="p">,</span>
+                              <span class="n">node_color</span><span class="o">=</span><span class="s1">&#39;lightblue&#39;</span><span class="p">,</span>
+                              <span class="n">node_size</span><span class="o">=</span><span class="p">[</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">50</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">city_nodes</span><span class="p">],</span>
+                              <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                              <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Города&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Рисуем узлы товаров</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> 
+                              <span class="n">nodelist</span><span class="o">=</span><span class="n">product_nodes</span><span class="p">,</span>
+                              <span class="n">node_color</span><span class="o">=</span><span class="s1">&#39;lightgreen&#39;</span><span class="p">,</span>
+                              <span class="n">node_size</span><span class="o">=</span><span class="p">[</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">30</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">product_nodes</span><span class="p">],</span>
+                              <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                              <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Товары&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Рисуем ребра</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">()</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">G</span><span class="p">[</span><span class="n">u</span><span class="p">][</span><span class="n">v</span><span class="p">][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">]</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_edges</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> 
+                              <span class="n">edgelist</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span>
+                              <span class="n">width</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span>
+                              <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                              <span class="n">edge_color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Подписи узлов</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_labels</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> 
+                               <span class="n">font_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+                               <span class="n">font_weight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Легенда</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">scatterpoints</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Граф товаров по городам</span><span class="se">\n</span><span class="s1">(Размер узлов показывает популярность товаров)&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="Graphs.get_city_goods_table">
+<a class="viewcode-back" href="../../Analisys.Graphs.html#Analisys.Graphs.Graphs.get_city_goods_table">[документация]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_city_goods_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Возвращает табличные данные для отображения&quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_city_goods_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        
+        <span class="c1"># Преобразуем в удобный формат</span>
+        <span class="n">table_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">city</span><span class="p">,</span> <span class="n">product</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">revenue</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">table_data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;Город&#39;</span><span class="p">:</span> <span class="n">city</span><span class="p">,</span>
+                <span class="s1">&#39;Товар&#39;</span><span class="p">:</span> <span class="n">product</span><span class="p">,</span>
+                <span class="s1">&#39;Количество&#39;</span><span class="p">:</span> <span class="n">quantity</span><span class="p">,</span>
+                <span class="s1">&#39;Выручка&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">revenue</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> руб.&quot;</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">table_data</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Приложение магазина</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Навигация</h3>
+<p class="caption" role="heading"><span class="caption-text">Модули:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Модули приложения</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Код модуля</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Рогозин А.Д..
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
