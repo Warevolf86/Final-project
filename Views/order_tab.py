@@ -181,19 +181,17 @@ class OrderTab:
                                           "Клиент".ljust(20) + " | " + 
                                           "Позиций".ljust(8) + " | " + 
                                           "Сумма".ljust(10) + " | " + 
-                                          "Статус".ljust(10) + " | " + 
                                           "Дата")
                 self.orders_listbox.insert(tk.END, "-" * 80)
                 
                 for order in orders:
-                    order_id, customer, total_price, order_date, status, item_count = order
+                    order_id, customer, total_price, order_date,  item_count = order
                     date_str = order_date.split()[0] if order_date else "н/д"
                     self.orders_listbox.insert(tk.END, 
                         f"{str(order_id).ljust(5)} | " +
                         f"{customer.ljust(20)} | " +
                         f"{str(item_count).ljust(8)} | " +
                         f"{str(total_price).ljust(10)} | " +
-                        f"{status.ljust(10)} | " +
                         f"{date_str}")
                     
         except sqlite3.Error as e:
