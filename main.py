@@ -216,7 +216,7 @@ class Application:
         tk.Label(self.tab5, text="О программе", 
                 font=('Arial', 10, 'bold')).pack(pady=10)
         tk.Label(self.tab5, 
-                text="Версия 1.0\nРазработчик: Ваше имя\n© 2023",
+                text="Версия 1.0\nРазработчик: Рогозин А.Д.\n2025",
                 justify='left').pack()
 
 if __name__ == "__main__":
