@@ -285,7 +285,7 @@ class AnalisysTab:
         button_date.grid(row=0, column=2, columnspan=2, padx=5)
 
         button_gr = tk.Button(form_frame2, text='Заказы по городам', pady=5, 
-                             bg='lightgreen', command=self.plot_city_goods_graph)  # Изменяем команду
+                             bg='lightgreen', command=self.plot_city_goods_graph) 
         button_gr.grid(row=0, column=4, columnspan=2, padx=5)
 
         # Создаем фрейм для вывода анализа данных

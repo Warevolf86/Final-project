@@ -23,8 +23,6 @@ class OrDates:
                 cursor.execute(dates_query)
                 dates_data = cursor.fetchall()
                 
-                # Отладочная печать
-                print("Данные по датам:", dates_data)
                 
                 return dates_data
         except sqlite3.Error as e:
